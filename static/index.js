@@ -1,13 +1,7 @@
-// import axios from "../node_modules/axios/dist/axios.js"
 async function submitForm() {
-    // Serialize form data
     var formData = new FormData(document.getElementById('myForm'));
     var btn = document.getElementsByClassName("btn")[0];
     btn.disabled = true;
-    // var jsonData = {};
-    // formData.forEach((value, key) => {
-    //     jsonData[key] = value;
-    // });
     const spinner = document.getElementById("spinner");
     spinner.classList.remove("d-none");
     const loadImageBase64 = (file) => {
@@ -35,25 +29,34 @@ async function submitForm() {
             },
         })
         .then(function(response) {
-            // console.log("data received");
-            // // Update the resultContainer with the received data
             console.log(response.data)
             var resultImage = document.getElementById('resultImage');
+            var list_class = document.getElementById('list_class');
+            var bar = document.getElementById('bar');
+            var bar_value = document.getElementById('bar_value');
             spinner.classList.add("d-none");
+            list_class.classList.remove("d-none");
+            bar.classList.remove("d-none");
             resultImage.src = 'data:image/jpeg;base64,'+response.data.roboflow_result;
-            // var resultContainer = document.getElementById('resultContainer')
-            // resultContainer.innerHTML = `
-            //     <h2>Results</h2>
-            //     <p>Roboflow Result: ${JSON.stringify(response.data)}</p>
-            // `;
+            // details_arr=["emblem","goi","image","details","qr","aadharno"];
+            let percentage=0;
+            response.data.details_set.forEach(i => {
+                console.log(i+percentage)
+                if(i!="aadharlogo"){
+                    percentage++;
+                document.getElementById(i).src="/static/correct.gif";
+                }
+            });
+
+            bar_value.style.width=(percentage/6)*100+'%'
+            bar_value.innerHTML=(percentage/6)*100+'%'
+
             btn.disabled = false;
         })
         .catch(function(error) {
             console.error('Error:', error);
-            // Handle errors if needed
         });
     } else {
         console.error('No file selected');
-        // Handle the case where no file is selected
     }
 }

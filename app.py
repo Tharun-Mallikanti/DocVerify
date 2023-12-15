@@ -66,6 +66,10 @@ def aadhar_number_search(text):
 
 @app.route('/')
 def index():
+    return render_template('home.html')
+
+@app.route('/verify')
+def verify():
     return render_template('index.html')
 
 @app.route('/submit', methods=['GET', 'POST'])
@@ -98,7 +102,11 @@ def submit():
 
         # Get predictions from the JSON response
         predictions = prediction_result.json()["predictions"]
-
+        print(predictions)
+        details_set=[]
+        for i in predictions:
+            details_set.append(i['class'])
+        print(details_set)
         # Overlay bounding boxes on the input image
         image_with_boxes = overlay_boxes(image.copy(), predictions)
 
@@ -121,7 +129,7 @@ def submit():
             base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
 
-        return jsonify({"roboflow_result": base64_image})
+        return jsonify({"roboflow_result": base64_image,"aadharno":found_aadhar_number,"details_set":details_set})
 
     except Exception as e:
         return jsonify({"error": str(e)})

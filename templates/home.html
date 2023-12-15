@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <style>
+        .nav1,
+        .but {
+            background: #42275a;
+            /* fallback for old browsers */
+            background: -webkit-linear-gradient(to right, #734b6d, #42275a);
+            /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #734b6d, #42275a);
+            /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+            ;
+        }
+    </style>
+    <title>DocVerify</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg nav1">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" style="color: white">DocV</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#" style="color: white">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/verify" style="color: white">Verify</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h1 class="heading"> <span style="color:#42275a;"> Document</span> verification </h1>
+        <div class="row">
+            <!-- <div class="col-xl-8 col-lg-8">
+                <p class="sub-heading">Authenticate documents from private and government sources.</p>
+                <p>Our website can instantly verify online documents with automated user consent and impersonation check
+                    in 195
+                    countries.</p>
+                <p>With user consent, get verified documents from any third party web source including government
+                    portals. We capture documents directly from the original web source such as statements,
+                    certificates, and reports.</p>
+                <p>The output is a machine-readable JSON file together with data provenance, as well as the original
+                    document for compliance.</p>
+                <p>We allow for real-time verifications that can be directed to your decision engine for
+                    automation and improved user experience for both consumers and enterprise clients.</p>
+            </div> -->
+            <div class="col-xl-8 col-lg-8">
+                <p class="sub-heading">Welcome to our document verification service!</p>
+                <p>Are you in need of verifying crucial documents like degree certificates or identification papers? Our
+                    platform employs cutting-edge Machine Learning technology to ensure the authenticity and accuracy of
+                    your uploaded PDFs or JPEGs.</p>
+                <p>Whether it's confirming the legitimacy of a university degree or validating an official ID, our
+                    system meticulously checks vital elements such as logos, names, components, and signature
+                    authorities. With our advanced algorithms, we aim to provide a seamless and reliable verification
+                    process, ensuring that your documents meet the necessary criteria.</p>
+                <p>Trust us to validate your documents swiftly and securely, giving you peace of mind in their
+                    authenticity.</p>
+            </div>
+            <div class="col-xl-4 col-lg-4">
+                <img src="{{ url_for('static', filename='doc.png') }}" alt="Document Image">
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
