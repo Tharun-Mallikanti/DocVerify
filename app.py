@@ -9,7 +9,6 @@ import re
 from difflib import SequenceMatcher
 from keras.models import load_model
 import numpy as np
-# import pytesseract
 
 app = Flask(__name__)
 
@@ -20,7 +19,7 @@ SIZE = 150
 
 def detect_emblem():
     # Load and preprocess the image
-    image = cv2.imread("emblem.jpg")
+    image = cv2.imread("static/emblem.jpg")
     image = Image.fromarray(image, 'RGB')
     image = image.resize((SIZE, SIZE))
     image_array = np.array(image)  # Normalize the image data
@@ -37,7 +36,7 @@ def detect_emblem():
 
 def detect_goi():
     # Load and preprocess the image
-    image = cv2.imread("goi.jpg")
+    image = cv2.imread("static/goi.jpg")
     image = Image.fromarray(image, 'RGB')
     image = image.resize((SIZE, SIZE))
     image_array = np.array(image)  # Normalize the image data
@@ -75,9 +74,7 @@ def overlay_boxes(image, predictions):
             "goi": "purple",
             "emblem": "orange",
         }
-
-        if(class_name == "aadharno" or class_name == "details" or class_name=="emblem" or class_name=="goi"):
-            txtbbs[class_name] = [x, y, x + w, y + h]
+        txtbbs[class_name] = [x, y, x + w, y + h]
         # Draw thick filled rectangle as background
         draw.rectangle([x, y, x + w, y + h], outline=class_colors.get(class_name, "white"), width=2)
 
@@ -149,14 +146,14 @@ def submit():
         image = Image.open(image_stream).convert('RGB')
 
         # Save the image to a file
-        image.save("input_image.jpg")
+        image.save("static/input_image.jpg")
         # from roboflow import Roboflow
         # my api key
         rf = Roboflow(api_key="2bwhxzy7AaegkJ9ubiIJ") 
         project = rf.workspace().project("docverify")
         model = project.version(1).model
 
-        prediction_result = model.predict("input_image.jpg", confidence=40, overlap=30)
+        prediction_result = model.predict("static/input_image.jpg", confidence=40, overlap=30)
 
         # Get predictions from the JSON response
         predictions = prediction_result.json()["predictions"]
@@ -169,18 +166,22 @@ def submit():
         image_with_boxes = overlay_boxes(image.copy(), predictions)
 
         # Save the image with bounding boxes (optional)
-        image_with_boxes.save("output_image.jpg")
+        image_with_boxes.save("static/output_image.jpg")
         details_region = image.crop(txtbbs["details"])
         aadharno_region = image.crop(txtbbs["aadharno"])
         emblem_region =image.crop(txtbbs["emblem"])
         goi_region =image.crop(txtbbs["goi"])
-        details_region.save("details.jpg")
-        aadharno_region.save("aadharno.jpg")
-        emblem_region.save("emblem.jpg")
-        goi_region.save("goi.jpg")
+        qr_region =image.crop(txtbbs["qr"])
+        image_region =image.crop(txtbbs["image"])
+        details_region.save("static/details.jpg")
+        aadharno_region.save("static/aadharno.jpg")
+        emblem_region.save("static/emblem.jpg")
+        goi_region.save("static/goi.jpg")
+        qr_region.save("static/qr.jpg")
+        image_region.save("static/image.jpg")
 
-        aadharno_text=extraction_of_text('aadharno.jpg')
-        details_text=extraction_of_text('details.jpg')
+        aadharno_text=extraction_of_text('static/aadharno.jpg')
+        details_text=extraction_of_text('static/details.jpg')
 
         found_aadhar_number = aadhar_number_search(aadharno_text)
         print(compare_strings(found_aadhar_number,inputAadhar,0.7))
@@ -191,7 +192,7 @@ def submit():
         print(detect_emblem())
         print(detect_goi())
 
-        with open("output_image.jpg", "rb") as image_file:
+        with open("static/output_image.jpg", "rb") as image_file:
             base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
 

@@ -61,6 +61,7 @@ async function submitForm() {
                 if(i!="aadharlogo"){
                     percentage++;
                 document.getElementById(i).src="/static/correct.gif";
+                document.getElementById(i+"-status").innerHTML=`<img id="" src="/static/${i}.jpg" alt="${i} Image">`
                 }
             });
 

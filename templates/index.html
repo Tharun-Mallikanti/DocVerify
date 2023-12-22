@@ -30,7 +30,7 @@
             align-items: center;
         }
 
-        .list-group-item img {
+        .gif {
             width: 30px;
             /* Adjust the width of the image as needed */
             height: auto;
@@ -98,7 +98,7 @@
                 <img src="" alt="" style="width: 100%;" id="resultImage">
             </div>
             <div class="col-md-6">
-                <ul class="list-group list-group-flush d-none" id="list_class">
+                <!-- <ul class="list-group list-group-flush d-none" id="list_class">
                     <li class="list-group-item">Emblem <img id="emblem"
                             src="{{ url_for('static', filename='incorrect.gif') }}" alt="Document Image" id="goi"></li>
                     <li class="list-group-item">GOI <img id="goi"
@@ -111,7 +111,59 @@
                             alt="Document Image"></li>
                     <li class="list-group-item">aadharno <img id="aadharno"
                             src="{{ url_for('static', filename='incorrect.gif') }}" alt="Document Image"></li>
-                </ul>
+                </ul> -->
+
+                <table class="table d-none" id="list_class">
+                    <thead>
+                        <tr>
+                            <th>Name of the object</th>
+                            <th>Image of the object</th>
+                            <th>Found or Not</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="emblem-name">Emblem</td>
+                            <td id="emblem-status"></td>
+                            <td><img id="emblem" class="gif" src="{{ url_for('static', filename='incorrect.gif') }}"
+                                    alt="Emblem Image"></td>
+                        </tr>
+                        <tr>
+                            <td id="goi-name">GOI</td>
+                            <td id="goi-status"></td>
+                            <td><img id="goi" class="gif" src="{{ url_for('static', filename='incorrect.gif') }}"
+                                    alt="GOI Image">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="image-name">Image</td>
+                            <td id="image-status"></td>
+                            <td><img id="image" class="gif" src="{{ url_for('static', filename='incorrect.gif') }}"
+                                    alt="Image Object"></td>
+                        </tr>
+                        <tr>
+                            <td id="details-name">Details</td>
+                            <td id="details-status"></td>
+                            <td><img id="details" class="gif" src="{{ url_for('static', filename='incorrect.gif') }}"
+                                    alt="Details Object"></td>
+                        </tr>
+                        <tr>
+                            <td id="qr-name">QR</td>
+                            <td id="qr-status"></td>
+                            <td><img id="qr" class="gif" src="{{ url_for('static', filename='incorrect.gif') }}"
+                                    alt="QR Object">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="aadharno-name">aadharno</td>
+                            <td id="aadharno-status"></td>
+                            <td><img id="aadharno" class="gif" src="{{ url_for('static', filename='incorrect.gif') }}"
+                                    alt="Aadharno Image"></td>
+                        </tr>
+                        <!-- Add more rows for other objects -->
+                    </tbody>
+                </table>
+
             </div>
             <div id="bar" class="d-none  mx-3">
                 <h5 class="mx-3">Percentage Match of the Document</h5>
