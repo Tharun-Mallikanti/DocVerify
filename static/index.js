@@ -1,5 +1,14 @@
 async function submitForm() {
     var formData = new FormData(document.getElementById('myForm'));
+
+    const inputName = document.getElementById('inputName').value;
+    const inputNumber = document.getElementById('inputNumber').value;
+    const inputAadhar = document.getElementById('inputAadhar').value;
+
+    console.log(inputAadhar);
+    console.log(inputNumber);
+    console.log(inputName);
+
     var btn = document.getElementsByClassName("btn")[0];
     btn.disabled = true;
     const spinner = document.getElementById("spinner");
@@ -20,10 +29,17 @@ async function submitForm() {
         // Pass the selected file to loadImageBase64 function
         const image = await loadImageBase64(fileInput.files[0]);
 
+        const data={
+            "inputAadhar":inputAadhar,
+            "inputName":inputName,
+            "inputNumber":inputNumber,
+            "image":image
+        }
+
         axios({
             method: "POST",
             url: "/submit",
-            data: { image },
+            data: data ,
             headers: {
                 "Content-Type": "application/json",
             },

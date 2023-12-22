@@ -6,11 +6,52 @@ from io import BytesIO
 import easyocr
 import cv2
 import re
+from difflib import SequenceMatcher
+from keras.models import load_model
+import numpy as np
 # import pytesseract
 
 app = Flask(__name__)
 
 txtbbs = {}
+emblem_model = load_model(r"C:\Users\tharu\Desktop\v2\emblem.h5")
+goi_model = load_model(r"C:\Users\tharu\Desktop\v2\goi.h5")
+SIZE = 150
+
+def detect_emblem():
+    # Load and preprocess the image
+    image = cv2.imread("emblem.jpg")
+    image = Image.fromarray(image, 'RGB')
+    image = image.resize((SIZE, SIZE))
+    image_array = np.array(image)  # Normalize the image data
+
+    # Prepare the image for prediction
+    input_image = np.expand_dims(image_array, axis=0)  # Add a batch dimension
+
+    # Perform prediction
+    prediction = emblem_model.predict(input_image)
+    if prediction[0][0] > 0.5:
+        return "The model predicts that the image contains emblem."
+    else:
+        return "The model predicts that the image not emblem"
+
+def detect_goi():
+    # Load and preprocess the image
+    image = cv2.imread("goi.jpg")
+    image = Image.fromarray(image, 'RGB')
+    image = image.resize((SIZE, SIZE))
+    image_array = np.array(image)  # Normalize the image data
+
+    # Prepare the image for prediction
+    input_image = np.expand_dims(image_array, axis=0)  # Add a batch dimension
+
+    # Perform prediction
+    prediction = goi_model.predict(input_image)
+    if prediction[0][0] > 0.5:
+        return "The model predicts that the image contains goi."
+    else:
+        return "The model predicts that the image not goi"
+    
 
 def overlay_boxes(image, predictions):
     draw = ImageDraw.Draw(image)
@@ -35,7 +76,7 @@ def overlay_boxes(image, predictions):
             "emblem": "orange",
         }
 
-        if(class_name == "aadharno" or class_name == "details"):
+        if(class_name == "aadharno" or class_name == "details" or class_name=="emblem" or class_name=="goi"):
             txtbbs[class_name] = [x, y, x + w, y + h]
         # Draw thick filled rectangle as background
         draw.rectangle([x, y, x + w, y + h], outline=class_colors.get(class_name, "white"), width=2)
@@ -64,6 +105,15 @@ def aadhar_number_search(text):
     else:
         return None
 
+def compare_strings(string1, string2, threshold):
+    seq_matcher = SequenceMatcher(None, string1, string2)
+    similarity_ratio = seq_matcher.ratio()
+
+    if similarity_ratio >= threshold:
+        return True
+    else:
+        return False 
+
 @app.route('/')
 def index():
     return render_template('home.html')
@@ -75,8 +125,16 @@ def verify():
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
     try:
+
+        inputName=request.json.get('inputName')
+        inputAadhar=request.json.get('inputAadhar')
+        inputNumber=request.json.get('inputNumber')
+
+        print(inputName,inputAadhar,inputNumber)
+
         # Retrieve image data
         image_data_uri = request.json.get('image')
+        
 
         # Extract base64-encoded part
         _, image_data_base64 = image_data_uri.split(',', 1)
@@ -102,7 +160,7 @@ def submit():
 
         # Get predictions from the JSON response
         predictions = prediction_result.json()["predictions"]
-        print(predictions)
+        # print(predictions)
         details_set=[]
         for i in predictions:
             details_set.append(i['class'])
@@ -114,16 +172,24 @@ def submit():
         image_with_boxes.save("output_image.jpg")
         details_region = image.crop(txtbbs["details"])
         aadharno_region = image.crop(txtbbs["aadharno"])
+        emblem_region =image.crop(txtbbs["emblem"])
+        goi_region =image.crop(txtbbs["goi"])
         details_region.save("details.jpg")
         aadharno_region.save("aadharno.jpg")
+        emblem_region.save("emblem.jpg")
+        goi_region.save("goi.jpg")
 
         aadharno_text=extraction_of_text('aadharno.jpg')
         details_text=extraction_of_text('details.jpg')
 
         found_aadhar_number = aadhar_number_search(aadharno_text)
+        print(compare_strings(found_aadhar_number,inputAadhar,0.7))
+        print(compare_strings(details_text,inputName,0.4))
         print(aadharno_text)
         print(found_aadhar_number)
         print(details_text)
+        print(detect_emblem())
+        print(detect_goi())
 
         with open("output_image.jpg", "rb") as image_file:
             base64_image = base64.b64encode(image_file.read()).decode('utf-8')
@@ -132,6 +198,7 @@ def submit():
         return jsonify({"roboflow_result": base64_image,"aadharno":found_aadhar_number,"details_set":details_set})
 
     except Exception as e:
+        print(str(e))
         return jsonify({"error": str(e)})
 
 if __name__ == '__main__':
