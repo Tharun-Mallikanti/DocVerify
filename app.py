@@ -153,7 +153,11 @@ def compare_strings(string1, string2, threshold):
     else:
         return False 
 
+
 @app.route('/')
+def home():
+    return render_template('some.html')
+@app.route('/home')
 def index():
     return render_template('home.html')
 
