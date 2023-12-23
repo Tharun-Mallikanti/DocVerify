@@ -12,12 +12,19 @@ import numpy as np
 
 app = Flask(__name__)
 
-txtbbs = {}
+
+
+txtbbs = {"aadharno":[0,0,0,0],"goi":[0,0,0,0],"details":[0,0,0,0],"image":[0,0,0,0],"qr":[0,0,0,0],"emblem":[0,0,0,0]}
 emblem_model = load_model(r"C:\Users\tharu\Desktop\v2\emblem.h5")
 goi_model = load_model(r"C:\Users\tharu\Desktop\v2\goi.h5")
 SIZE = 150
 
-def detect_emblem():
+
+
+def detect_emblem(image):
+    emblem_region =image.crop(txtbbs["emblem"])
+    emblem_region.save("static/emblem.jpg")
+
     # Load and preprocess the image
     image = cv2.imread("static/emblem.jpg")
     image = Image.fromarray(image, 'RGB')
@@ -30,11 +37,15 @@ def detect_emblem():
     # Perform prediction
     prediction = emblem_model.predict(input_image)
     if prediction[0][0] > 0.5:
-        return "The model predicts that the image contains emblem."
+        return True
     else:
-        return "The model predicts that the image not emblem"
+        return False
+    
 
-def detect_goi():
+
+def detect_goi(image):
+    goi_region =image.crop(txtbbs["goi"])
+    goi_region.save("static/goi.jpg")
     # Load and preprocess the image
     image = cv2.imread("static/goi.jpg")
     image = Image.fromarray(image, 'RGB')
@@ -47,9 +58,40 @@ def detect_goi():
     # Perform prediction
     prediction = goi_model.predict(input_image)
     if prediction[0][0] > 0.5:
-        return "The model predicts that the image contains goi."
+        return True
     else:
-        return "The model predicts that the image not goi"
+        return False
+    
+
+def detect_details(image,inputName):
+    details_region = image.crop(txtbbs["details"])
+    details_region.save("static/details.jpg")
+
+    details_text=extraction_of_text('static/details.jpg')
+    print(inputName)
+    return compare_strings(details_text,inputName,0.4)
+
+
+def detect_aadhar(image,inputAadhar):
+    aadharno_region = image.crop(txtbbs["aadharno"])
+    aadharno_region.save("static/aadharno.jpg")
+
+    aadharno_text=extraction_of_text('static/aadharno.jpg')
+    found_aadhar_number = aadhar_number_search(aadharno_text)
+    print(inputAadhar)
+    return compare_strings(found_aadhar_number,inputAadhar,0.7)
+
+def detect_image(image):
+    image_region =image.crop(txtbbs["image"])
+    image_region.save("static/image.jpg")
+    return True
+
+
+
+def detect_qr(image):
+    qr_region =image.crop(txtbbs["qr"])
+    qr_region.save("static/qr.jpg")
+    return True
     
 
 def overlay_boxes(image, predictions):
@@ -149,54 +191,46 @@ def submit():
         image.save("static/input_image.jpg")
         # from roboflow import Roboflow
         # my api key
-        rf = Roboflow(api_key="2bwhxzy7AaegkJ9ubiIJ") 
-        project = rf.workspace().project("docverify")
-        model = project.version(1).model
+        # rf = Roboflow(api_key="2bwhxzy7AaegkJ9ubiIJ") 
+        # project = rf.workspace().project("docverify")
+        # model = project.version(1).model
+
+
+        rf = Roboflow(api_key="RMzZna7r8BabI0Fz7SJV")
+        project = rf.workspace().project("aadhardetection")
+        model = project.version(3).model
 
         prediction_result = model.predict("static/input_image.jpg", confidence=40, overlap=30)
 
         # Get predictions from the JSON response
         predictions = prediction_result.json()["predictions"]
         # print(predictions)
-        details_set=[]
+        details_set={}
         for i in predictions:
-            details_set.append(i['class'])
+            details_set[i['class']]="False"
         print(details_set)
         # Overlay bounding boxes on the input image
         image_with_boxes = overlay_boxes(image.copy(), predictions)
 
         # Save the image with bounding boxes (optional)
         image_with_boxes.save("static/output_image.jpg")
-        details_region = image.crop(txtbbs["details"])
-        aadharno_region = image.crop(txtbbs["aadharno"])
-        emblem_region =image.crop(txtbbs["emblem"])
-        goi_region =image.crop(txtbbs["goi"])
-        qr_region =image.crop(txtbbs["qr"])
-        image_region =image.crop(txtbbs["image"])
-        details_region.save("static/details.jpg")
-        aadharno_region.save("static/aadharno.jpg")
-        emblem_region.save("static/emblem.jpg")
-        goi_region.save("static/goi.jpg")
-        qr_region.save("static/qr.jpg")
-        image_region.save("static/image.jpg")
 
-        aadharno_text=extraction_of_text('static/aadharno.jpg')
-        details_text=extraction_of_text('static/details.jpg')
+        if(sum(txtbbs["qr"])!=0 and detect_qr(image)): details_set["qr"]="True"
+        if(sum(txtbbs["aadharno"])!=0 and detect_aadhar(image,inputAadhar)): details_set["aadharno"]="True"
+        if(sum(txtbbs["details"])!=0 and  detect_details(image,inputName)):  details_set["details"]="True"
+        if(sum(txtbbs["image"])!=0 and  detect_image(image)): details_set["image"]="True"
+        if(sum(txtbbs["emblem"])!=0 and  detect_emblem(image)): details_set["emblem"]="True" 
+        if(sum(txtbbs["goi"])!=0 and  detect_goi(image)): details_set["goi"]="True"
 
-        found_aadhar_number = aadhar_number_search(aadharno_text)
-        print(compare_strings(found_aadhar_number,inputAadhar,0.7))
-        print(compare_strings(details_text,inputName,0.4))
-        print(aadharno_text)
-        print(found_aadhar_number)
-        print(details_text)
-        print(detect_emblem())
-        print(detect_goi())
 
+        print(details_set)
+
+        
         with open("static/output_image.jpg", "rb") as image_file:
             base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
 
-        return jsonify({"roboflow_result": base64_image,"aadharno":found_aadhar_number,"details_set":details_set})
+        return jsonify({"roboflow_result": base64_image,"details_set":details_set})
 
     except Exception as e:
         print(str(e))

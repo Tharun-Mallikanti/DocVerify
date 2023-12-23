@@ -56,14 +56,29 @@ async function submitForm() {
             resultImage.src = 'data:image/jpeg;base64,'+response.data.roboflow_result;
             // details_arr=["emblem","goi","image","details","qr","aadharno"];
             let percentage=0;
-            response.data.details_set.forEach(i => {
-                console.log(i+percentage)
-                if(i!="aadharlogo"){
-                    percentage++;
-                document.getElementById(i).src="/static/correct.gif";
-                document.getElementById(i+"-status").innerHTML=`<img id="" src="/static/${i}.jpg" alt="${i} Image">`
+            // response.data.details_set.forEach(i => {
+            //     console.log(i+percentage)
+            //     if(i!="aadharlogo"){
+            //         percentage++;
+            //     document.getElementById(i).src="/static/correct.gif";
+            //     document.getElementById(i+"-status").innerHTML=`<img id="" src="/static/${i}.jpg" alt="${i} Image">`
+            //     }
+            // });
+
+            for (let key in response.data.details_set) {
+                if (response.data.details_set.hasOwnProperty(key)) {
+                    const i = response.data.details_set[key];
+                    
+                    console.log(i + percentage);
+            
+                    if (key !== "aadharlogo") {
+                        percentage++;
+                        if(i==="True") document.getElementById(key).src = "/static/correct.gif";
+                        document.getElementById(key + "-status").innerHTML = `<img id="" src="/static/${key}.jpg" alt="${key} Image">`;
+                    }
                 }
-            });
+            }
+            
 
             bar_value.style.width=(percentage/6)*100+'%'
             bar_value.innerHTML=(percentage/6)*100+'%'
