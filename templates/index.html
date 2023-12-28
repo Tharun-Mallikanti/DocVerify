@@ -98,21 +98,6 @@
                 <img src="" alt="" style="width: 100%;" id="resultImage">
             </div>
             <div class="col-md-6">
-                <!-- <ul class="list-group list-group-flush d-none" id="list_class">
-                    <li class="list-group-item">Emblem <img id="emblem"
-                            src="{{ url_for('static', filename='incorrect.gif') }}" alt="Document Image" id="goi"></li>
-                    <li class="list-group-item">GOI <img id="goi"
-                            src="{{ url_for('static', filename='incorrect.gif') }}" alt="Document Image"></li>
-                    <li class="list-group-item">Image <img id="image"
-                            src="{{ url_for('static', filename='incorrect.gif') }}" alt="Document Image"></li>
-                    <li class="list-group-item">Details <img id="details"
-                            src="{{ url_for('static', filename='incorrect.gif') }}" alt="Document Image"></li>
-                    <li class="list-group-item">QR <img id="qr" src="{{ url_for('static', filename='incorrect.gif') }}"
-                            alt="Document Image"></li>
-                    <li class="list-group-item">aadharno <img id="aadharno"
-                            src="{{ url_for('static', filename='incorrect.gif') }}" alt="Document Image"></li>
-                </ul> -->
-
                 <table class="table d-none" id="list_class">
                     <thead>
                         <tr>
@@ -165,13 +150,17 @@
                 </table>
 
             </div>
-            <div id="bar" class="d-none  mx-3">
+            <div id="bar" class="d-none  mx-3 my-4">
                 <h5 class="mx-3">Percentage Match of the Document</h5>
                 <div class="progress" role="progressbar" aria-label="Success example" aria-valuenow="25"
                     aria-valuemin="0" aria-valuemax="100" style="padding-left:0px;">
                     <div class="progress-bar bg-success " id="bar_value" style="width: 25%"></div>
                 </div>
             </div>
+            <div class="col-4"></div>
+            <button class="btn btn-outline-primary col-4 d-none" id="tryagain" onclick="location.reload()">Try
+                Again</button>
+            <div class="col-4"></div>
         </div>
     </div>
 

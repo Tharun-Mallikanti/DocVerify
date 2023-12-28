@@ -6,6 +6,7 @@ from io import BytesIO
 import easyocr
 import cv2
 import re
+import os
 from difflib import SequenceMatcher
 from keras.models import load_model
 import numpy as np
@@ -154,6 +155,18 @@ def compare_strings(string1, string2, threshold):
         return False 
 
 
+def delete_jpg_images():
+    directory_path = r'C:\Users\tharu\Desktop\v2\static'
+    try:
+        for filename in os.listdir(directory_path):
+            if filename.endswith(".jpg"):
+                os.remove(os.path.join(directory_path, filename))
+        return "JPG images deleted successfully"
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
+    
+
+
 @app.route('/')
 def home():
     return render_template('some.html')
@@ -168,7 +181,7 @@ def verify():
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
     try:
-
+        # delete_jpg_images()
         inputName=request.json.get('inputName')
         inputAadhar=request.json.get('inputAadhar')
         inputNumber=request.json.get('inputNumber')
@@ -195,6 +208,8 @@ def submit():
         image.save("static/input_image.jpg")
         # from roboflow import Roboflow
         # my api key
+
+
         # rf = Roboflow(api_key="2bwhxzy7AaegkJ9ubiIJ") 
         # project = rf.workspace().project("docverify")
         # model = project.version(1).model

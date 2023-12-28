@@ -1,6 +1,6 @@
 async function submitForm() {
     var formData = new FormData(document.getElementById('myForm'));
-
+    document.getElementById('myForm').classList.add("d-none");
     const inputName = document.getElementById('inputName').value;
     const inputNumber = document.getElementById('inputNumber').value;
     const inputAadhar = document.getElementById('inputAadhar').value;
@@ -50,8 +50,10 @@ async function submitForm() {
             var list_class = document.getElementById('list_class');
             var bar = document.getElementById('bar');
             var bar_value = document.getElementById('bar_value');
+            var try_again_btn = document.getElementById('tryagain');
             spinner.classList.add("d-none");
             list_class.classList.remove("d-none");
+            try_again_btn.classList.remove("d-none");
             bar.classList.remove("d-none");
             resultImage.src = 'data:image/jpeg;base64,'+response.data.roboflow_result;
             // details_arr=["emblem","goi","image","details","qr","aadharno"];
@@ -72,9 +74,12 @@ async function submitForm() {
                     console.log(i + percentage);
             
                     if (key !== "aadharlogo") {
-                        percentage++;
-                        if(i==="True") document.getElementById(key).src = "/static/correct.gif";
-                        document.getElementById(key + "-status").innerHTML = `<img id="" src="/static/${key}.jpg" alt="${key} Image">`;
+                        if(i==="True"){
+                            percentage++;
+                            document.getElementById(key).src = "/static/correct.gif";
+                            document.getElementById(key + "-status").innerHTML = `<img id="" src="/static/${key}.jpg" alt="${key} Image">`;
+                        }    
+                            
                     }
                 }
             }
