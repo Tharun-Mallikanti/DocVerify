@@ -7,26 +7,58 @@ import easyocr
 import cv2
 import re
 import os
+import shutil
 from difflib import SequenceMatcher
 from keras.models import load_model
 import numpy as np
+import subprocess
 
 app = Flask(__name__)
 
 
 
-txtbbs = {"aadharno":[0,0,0,0],"goi":[0,0,0,0],"details":[0,0,0,0],"image":[0,0,0,0],"qr":[0,0,0,0],"emblem":[0,0,0,0]}
 emblem_model = load_model(r"C:\Users\tharu\Desktop\v2\emblem.h5")
 goi_model = load_model(r"C:\Users\tharu\Desktop\v2\goi.h5")
 SIZE = 150
+details_set={"aadharno":"False","details":"False","emblem":"False","goi":"False","image":"False","qr":"False"}
+detect_set=set()
 
 
+def run_yolo(image_path):
+    # Replace this with the actual path to your YOLO model and configuration files
+    yolo_path = 'path_to_your_yolo_files'
+    yolo_command = f'yolo task=detect mode=predict model=best.pt show=true conf=0.5 source={image_path} save_crop=True'
+    subprocess.run(yolo_command, shell=True)
+    move_images()
 
-def detect_emblem(image):
-    emblem_region =image.crop(txtbbs["emblem"])
-    emblem_region.save("static/emblem.jpg")
 
-    # Load and preprocess the image
+def move_images():
+    detect_folder = r'C:\Users\tharu\Desktop\v2\static\detect'
+    static_folder = r'C:\Users\tharu\Desktop\v2\static'
+
+    for root, dirs, files in os.walk(detect_folder):
+        for file in files:
+            if file.lower().endswith('.jpg'):  
+                image_path = os.path.join(root, file)
+                parent_folder = os.path.basename(os.path.dirname(image_path))
+                detect_set.add(parent_folder)
+                destination_path = os.path.join(static_folder, f"{parent_folder}.jpg")
+                shutil.move(image_path, destination_path)
+
+    print("Images moved successfully to the 'static' folder!")
+
+    # Delete the 'detect' folder and its contents after moving the images
+    shutil.rmtree(detect_folder)
+
+    print("The 'detect' folder has been deleted.")
+
+def delete_images():
+    for i,j in details_set.items():
+        pth=f"static/{i}.jpg"
+        if(os.path.exists(pth)):
+            os.remove(pth)
+
+def detect_emblem():
     image = cv2.imread("static/emblem.jpg")
     image = Image.fromarray(image, 'RGB')
     image = image.resize((SIZE, SIZE))
@@ -44,9 +76,7 @@ def detect_emblem(image):
     
 
 
-def detect_goi(image):
-    goi_region =image.crop(txtbbs["goi"])
-    goi_region.save("static/goi.jpg")
+def detect_goi():
     # Load and preprocess the image
     image = cv2.imread("static/goi.jpg")
     image = Image.fromarray(image, 'RGB')
@@ -64,68 +94,26 @@ def detect_goi(image):
         return False
     
 
-def detect_details(image,inputName):
-    details_region = image.crop(txtbbs["details"])
-    details_region.save("static/details.jpg")
-
+def detect_details(inputName):
     details_text=extraction_of_text('static/details.jpg')
     print(inputName)
     return compare_strings(details_text,inputName,0.4)
 
 
-def detect_aadhar(image,inputAadhar):
-    aadharno_region = image.crop(txtbbs["aadharno"])
-    aadharno_region.save("static/aadharno.jpg")
-
+def detect_aadhar(inputAadhar):
     aadharno_text=extraction_of_text('static/aadharno.jpg')
     found_aadhar_number = aadhar_number_search(aadharno_text)
     print(inputAadhar)
     return compare_strings(found_aadhar_number,inputAadhar,0.7)
 
-def detect_image(image):
-    image_region =image.crop(txtbbs["image"])
-    image_region.save("static/image.jpg")
+def detect_image():
     return True
 
 
 
-def detect_qr(image):
-    qr_region =image.crop(txtbbs["qr"])
-    qr_region.save("static/qr.jpg")
+def detect_qr():
     return True
     
-
-def overlay_boxes(image, predictions):
-    draw = ImageDraw.Draw(image)
-    for prediction in predictions:
-        width, height = image.size
-        x_center, y_center, w, h = (
-            prediction["x"],
-            prediction["y"],
-            prediction["width"],
-            prediction["height"],
-        )
-        x, y = x_center - w / 2, y_center - h / 2  # Calculate top-left coordinates
-        class_name = prediction["class"]
-
-        # Set background color based on class
-        class_colors = {
-            "details": "blue",
-            "qr": "green",
-            "image": "black",
-            "aadharno": "red",
-            "goi": "purple",
-            "emblem": "orange",
-        }
-        txtbbs[class_name] = [x, y, x + w, y + h]
-        # Draw thick filled rectangle as background
-        draw.rectangle([x, y, x + w, y + h], outline=class_colors.get(class_name, "white"), width=2)
-
-        # Draw class name on top-left corner in white
-        draw.rectangle([x, y, x+50, y+20], fill=class_colors.get(class_name, "white"))
-        draw.text((x, y), class_name, fill="white")
-    print(txtbbs)
-    return image
 
 def extraction_of_text(image):
     reader = easyocr.Reader(['en'])
@@ -155,18 +143,6 @@ def compare_strings(string1, string2, threshold):
         return False 
 
 
-def delete_jpg_images():
-    directory_path = r'C:\Users\tharu\Desktop\v2\static'
-    try:
-        for filename in os.listdir(directory_path):
-            if filename.endswith(".jpg"):
-                os.remove(os.path.join(directory_path, filename))
-        return "JPG images deleted successfully"
-    except Exception as e:
-        return f"An error occurred: {str(e)}"
-    
-
-
 @app.route('/')
 def home():
     return render_template('some.html')
@@ -181,7 +157,7 @@ def verify():
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
     try:
-        # delete_jpg_images()
+        delete_images()
         inputName=request.json.get('inputName')
         inputAadhar=request.json.get('inputAadhar')
         inputNumber=request.json.get('inputNumber')
@@ -206,46 +182,21 @@ def submit():
 
         # Save the image to a file
         image.save("static/input_image.jpg")
-        # from roboflow import Roboflow
-        # my api key
 
+        run_yolo("static/input_image.jpg")
 
-        # rf = Roboflow(api_key="2bwhxzy7AaegkJ9ubiIJ") 
-        # project = rf.workspace().project("docverify")
-        # model = project.version(1).model
-
-
-        rf = Roboflow(api_key="RMzZna7r8BabI0Fz7SJV")
-        project = rf.workspace().project("aadhardetection")
-        model = project.version(3).model
-
-        prediction_result = model.predict("static/input_image.jpg", confidence=40, overlap=30)
-
-        # Get predictions from the JSON response
-        predictions = prediction_result.json()["predictions"]
-        # print(predictions)
-        details_set={}
-        for i in predictions:
-            details_set[i['class']]="False"
-        print(details_set)
-        # Overlay bounding boxes on the input image
-        image_with_boxes = overlay_boxes(image.copy(), predictions)
-
-        # Save the image with bounding boxes (optional)
-        image_with_boxes.save("static/output_image.jpg")
-
-        if(sum(txtbbs["qr"])!=0 and detect_qr(image)): details_set["qr"]="True"
-        if(sum(txtbbs["aadharno"])!=0 and detect_aadhar(image,inputAadhar)): details_set["aadharno"]="True"
-        if(sum(txtbbs["details"])!=0 and  detect_details(image,inputName)):  details_set["details"]="True"
-        if(sum(txtbbs["image"])!=0 and  detect_image(image)): details_set["image"]="True"
-        if(sum(txtbbs["emblem"])!=0 and  detect_emblem(image)): details_set["emblem"]="True" 
-        if(sum(txtbbs["goi"])!=0 and  detect_goi(image)): details_set["goi"]="True"
+        if("qr" in detect_set and detect_qr()): details_set["qr"]="True"
+        if("aadharno" in detect_set and detect_aadhar(inputAadhar)): details_set["aadharno"]="True"
+        if("details" in detect_set and  detect_details(inputName)):  details_set["details"]="True"
+        if("image" in detect_set and  detect_image()): details_set["image"]="True"
+        if("emblem" in detect_set and  detect_emblem()): details_set["emblem"]="True" 
+        if("goi" in detect_set and  detect_goi()): details_set["goi"]="True"
 
 
         print(details_set)
 
         
-        with open("static/output_image.jpg", "rb") as image_file:
+        with open("static/predict.jpg", "rb") as image_file:
             base64_image = base64.b64encode(image_file.read()).decode('utf-8')
 
 
