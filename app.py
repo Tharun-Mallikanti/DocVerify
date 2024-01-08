@@ -53,6 +53,8 @@ def move_images():
     print("The 'detect' folder has been deleted.")
 
 def delete_images():
+    global details_set
+    details_set={"aadharno":"False","details":"False","emblem":"False","goi":"False","image":"False","qr":"False"}
     for i,j in details_set.items():
         pth=f"static/{i}.jpg"
         if(os.path.exists(pth)):
